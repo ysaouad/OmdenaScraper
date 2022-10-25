@@ -10,7 +10,7 @@ def scrape_website(url_list, headers):
     scraped_posts =[]
     for url in url_list:
         scraped_urls, topic = scrape_urls_by_topic(url, headers, session_object)
-        scraped_posts_topic, fieldnames = scrape_topic(scraped_urls, topic, headers)
+        scraped_posts_topic, fieldnames = scrape_topic(scraped_urls, topic, headers, session_object)
         scraped_posts.append(scraped_posts_topic)
     return scraped_posts, fieldnames
 
@@ -83,7 +83,7 @@ def scrape_urls_by_topic(url, headers, session_object):
             
     return post_urls, topic
 
-def scrape_topic(post_urls, topic, headers):
+def scrape_topic(post_urls, topic, headers, session_object):
 
     post_dict = []
     fieldnames = ["Topic","Date","Title","URL","Main_Post"]
