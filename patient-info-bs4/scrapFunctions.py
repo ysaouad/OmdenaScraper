@@ -11,7 +11,8 @@ def scrape_website(url_list, headers):
     for url in url_list:
         scraped_urls, topic = scrape_urls_by_topic(url, headers, session_object)
         scraped_posts_topic, fieldnames = scrape_topic(scraped_urls, topic, headers, session_object)
-        scraped_posts.append(scraped_posts_topic)
+        scraped_posts = scraped_posts + scraped_posts_topic
+    #print(scraped_posts)
     return scraped_posts, fieldnames
 
 def scrape_urls_by_topic(url, headers, session_object):
@@ -27,10 +28,10 @@ def scrape_urls_by_topic(url, headers, session_object):
     dom = etree.HTML(str(soup))
 
     try:
-        page_num = dom.xpath(f'/html/body/div[1]/div/div[2]/div[1]/div/div/div/div[1]/div/div[2]/form/select/option[1]/text()')[0]
+        page_num = dom.xpath('/html/body/div[1]/div/div[2]/div[1]/div/div/div/div[1]/div/div[2]/form/select/option[1]/text()')[0]
         page_num = re.findall("1\/([1-9]*)", page_num)
         page_num = int(page_num[0])
-        topic = dom.xpath(f"/html/body/div[1]/div/div[2]/header/div[2]/div/div/h1/text()")[0]
+        topic = dom.xpath("/html/body/div[1]/div/div[2]/header/div[2]/div/div/h1/text()")[0]
         topic = re.sub("\s","",topic)
     except: 
         if page_num is not None and topic is None:
@@ -63,7 +64,7 @@ def scrape_urls_by_topic(url, headers, session_object):
                 print("An exception was thrown for the topic, ", topic, "at page :",i, " previously searched url :", post_url, "and xpath :", dom.xpath(XPATH))
                 continue
     
-    page_url = url + f"?page={page_num}#group-discussions"
+    page_url = url + f"?page={page_num-1}#group-discussions"
     response = session_object.get(page_url, headers=headers)
     soup = BeautifulSoup(response.content, 'lxml')
     
@@ -78,7 +79,7 @@ def scrape_urls_by_topic(url, headers, session_object):
                 post_urls.append(post_url)
             except:
                 #print("An exception was thrown for the topic, ", topic, "at page",i, " with this url ", post_url, "and xpath", dom.xpath(XPATH))
-                print("End of page") #Need a proper way to take factor in the end of a page before the 37 post limit
+                print("End of page at post number", j) #Need a proper way to take factor in the end of a page before the 37 post limit
                 break
             
     return post_urls, topic
